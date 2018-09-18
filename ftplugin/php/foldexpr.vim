@@ -83,7 +83,7 @@ function! GetPhpFold(lnum)
         " be right after the class or function declaration, so search for it.
         let nextCurly = FindNextDelimiter(a:lnum, '{')
         return '>' . IndentLevel(nextnonblank(nextCurly + 1))
-    elseif line =~? '{' && line !~? '\v^\s*\*'
+    elseif line =~? '^\s*{\s*$' && line !~? '\v^\s*\*'
         " The fold level of the curly is determined by the next non-blank line
         return IndentLevel(a:lnum) + 1
     elseif line =~? '\v^\s*\*@!\}(\s*(else|catch|finally))@!'
