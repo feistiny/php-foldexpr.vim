@@ -38,6 +38,9 @@ endif
 if !exists('b:phpfold_doc_with_funcs')
     let b:phpfold_doc_with_funcs = 1
 endif
+if !exists('b:phpfold_use_level')
+    let b:phpfold_use_level = 1
+endif
 
 " If we want to fold functions with their blocks, we have to fold the blocks.
 if b:phpfold_doc_with_funcs
@@ -58,9 +61,9 @@ function! GetPhpFold(lnum)
         " i.e. namespace imports
         if line =~? '\v^use\s+' && getline(a:lnum+1) =~? '\v^(use\s+)@!'
             " Stop the fold at the last use statement.
-            return '<1'
+            return '<'.b:phpfold_use_level
         elseif line =~? '\v^use\s+'
-            return '1'
+            return ''.b:phpfold_use_level
         endif
     endif
 
