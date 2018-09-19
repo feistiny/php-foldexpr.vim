@@ -5,8 +5,9 @@ Vim folding for PHP with `foldexpr`
 
 Configuration
 -------------
-
+- `g:phpfold_open = 1` - Whether fold defaultly.
 - `b:phpfold_use = 1` - Fold groups of use statements in the global scope.
+- `b:phpfold_use_level = 2` - Set use statements foldlevel.
 - `b:phpfold_group_iftry = 0` - Fold if/elseif/else and try/catch/finally blocks as a group, rather than each part separate.
 - `b:phpfold_group_args = 1` - Group function arguments split across multiple lines into their own fold.
 - `b:phpfold_group_case = 1` - Fold case and default blocks inside switches.
@@ -16,6 +17,21 @@ Configuration
 - `b:phpfold_text = 1` - Enable the custom `foldtext` option.
 - `b:phpfold_text_right_lines = 1` - Display the line count on the right instead of the left.
 - `b:phpfold_text_percent = 0` - Display the percentage of lines the fold represents.
+- `g:phpfold_options_dict = {}` - Option dictionaries to set in .vimrc .
+```
+g:phpfold_options_dict = {
+  \'phpfold_heredocs': 1,
+  \'phpfold_text_right_lines': 1,
+  \'phpfold_doc_with_funcs': 1,
+  \'phpfold_group_iftry': 1,
+  \'phpfold_use_level': 2,
+\}
+```
+
+Mapping
+------------
+default mapping:
+`nnoremap <silent><leader>pf :call SwitchPhpFold() \| e<cr>`
 
 Installation
 ------------

@@ -4,7 +4,9 @@
 " Maintainer: Jake Soward <swekaj@gmail.com>
 "
 " Options: 
+"           g:phpfold_open = 1           - Whether fold defaultly.
 "           b:phpfold_use = 1            - Fold groups of use statements in the global scope.
+"           b:phpfold_use_level = 2      - Set use statements foldlevel.
 "           b:phpfold_group_iftry = 0    - Fold if/elseif/else and try/catch/finally
 "                                          blocks as a group, rather than each part separate.
 "           b:phpfold_group_args = 1     - Group function arguments split across multiple
@@ -13,7 +15,8 @@
 "           b:phpfold_heredocs = 1       - Fold HEREDOCs and NOWDOCs.
 "           b:phpfold_docblocks = 1      - Fold DocBlocks.
 "           b:phpfold_doc_with_funcs = 1 - Fold DocBlocks. Overrides b:phpfold_docblocks.
-"
+"           g:phpfold_options_dict = {}  - Option dictionaries to set in .vimrc .
+
 " Known Bugs:
 "  - In switch statements, the closing } is included in the fold of the last case or 
 "    default block.
@@ -46,9 +49,55 @@ endif
 if b:phpfold_doc_with_funcs
     let b:phpfold_docblocks = 1
 endif
+if !exists('g:phpfold_open')
+    let g:phpfold_open = 1
+endif
+if !exists('g:phpfold_options_dict')
+    let g:phpfold_options_dict = {
+        \'phpfold_heredocs': 1,
+        \'phpfold_text_right_lines': 1,
+        \'phpfold_doc_with_funcs': 1,
+        \'phpfold_group_iftry': 1,
+        \'phpfold_use_level': get(g:, 'phpfold_use_level', 2),
+        \}
+endif
+if g:phpfold_open
+    for [s:option_name,s:option_value] in items(g:phpfold_options_dict)
+        call setbufvar('%', s:option_name, s:option_value)
+    endfor
+endif
+
+nnoremap <silent><leader>pf :call SwitchPhpFold() \| e<cr>
+fun! SwitchPhpFold(...)
+    if &filetype != 'php'
+        return
+    endif
+    let b:phpfold_open = get(b:, 'phpfold_open', g:phpfold_open)
+    echo 'get' b:phpfold_open
+    if b:phpfold_open == 1
+        set foldlevel=99
+        let b:phpfold_open = 0
+    elseif b:phpfold_open == 0
+        set foldlevel=1
+        let b:phpfold_open = 1
+    endif
+endf
+
+if !exists('b:phpfold_winheight')
+    let b:phpfold_winheight=winheight('%')
+endif
+if !exists('b:phpfold_min_ratio')
+    let b:phpfold_min_ratio=1.0
+elseif exists('b:phpfold_min_ratio')
+    let b:phpfold_min_ratio=1.0*b:phpfold_min_ratio
+endif
 
 function! GetPhpFold(lnum)
-    if exists('b:phpfold_open') && b:phpfold_open == 0
+    if ( exists('b:phpfold_open') && !b:phpfold_open )
+        \|| ( !exists('b:phpfold_open') && !g:phpfold_open )
+        return '0'
+    elseif b:phpfold_min_ratio>=1 && line('$') / round(b:phpfold_winheight) < b:phpfold_min_ratio
+        " not fold when file height is less than the winheight
         return '0'
     endif
 
