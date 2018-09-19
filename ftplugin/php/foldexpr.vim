@@ -48,7 +48,39 @@ if b:phpfold_doc_with_funcs
 endif
 
 function! GetPhpFold(lnum)
+    if exists('b:phpfold_open') && b:phpfold_open == 0
+        return '0'
+    endif
+
     let line = getline(a:lnum)
+
+    " All lines in heredocs should has the same foldlevel as the defined variable above with priority.
+    if b:phpfold_heredocs
+        " Fold the here and now docs
+        if line =~? "<<<[a-zA-Z_][a-zA-Z0-9_]*$"
+            let b:in_heredoc = 1
+            return '>'.(IndentLevel(a:lnum)+1)
+        elseif line =~? "<<<'[a-zA-Z_][a-zA-Z0-9_]*'$"
+            return '>'.(IndentLevel(a:lnum)+1)
+        elseif line =~? "^[a-zA-Z_][a-zA-Z0-9_]*;$"
+            " heredocs and now docs end the same way, so we have to check for both starts and see which
+            " appeared latest in the file.  We then assume that one opened the fold.
+            let heredoc = FindPrevDelimiter(a:lnum-1, '<<<'.strpart(line, 0, strlen(line)-1))
+            let nowdoc = FindPrevDelimiter(a:lnum-1, "<<<'".strpart(line, 0, strlen(line)-1)."'")
+            let startLine = -1
+            if heredoc > nowdoc
+                let startLine = heredoc
+            elseif nowdoc > heredoc
+                let startLine = nowdoc
+            endif
+            if startLine >= 0
+                let b:in_heredoc = 0
+                return '<'.(IndentLevel(startLine)+1)
+            endif
+        elseif b:in_heredoc == 1
+            return '='
+        endif
+    endif
 
     " Empty lines get the same fold level as the line before them.
     " e.g. blank lines between class methods continue the class-level fold.
@@ -151,29 +183,6 @@ function! GetPhpFold(lnum)
             return '>' .(IndentLevel(a:lnum)+1)
         else
             return IndentLevel(a:lnum)+1
-        endif
-    endif
-
-    if b:phpfold_heredocs
-        " Fold the here and now docs
-        if line =~? "<<<[a-zA-Z_][a-zA-Z0-9_]*$"
-            return '>'.(IndentLevel(a:lnum)+1)
-        elseif line =~? "<<<'[a-zA-Z_][a-zA-Z0-9_]*'$"
-            return '>'.(IndentLevel(a:lnum)+1)
-        elseif line =~? "^[a-zA-Z_][a-zA-Z0-9_]*;$"
-            " heredocs and now docs end the same way, so we have to check for both starts and see which 
-            " appeared latest in the file.  We then assume that one opened the fold.
-            let heredoc = FindPrevDelimiter(a:lnum-1, '<<<'.strpart(line, 0, strlen(line)-1))
-            let nowdoc = FindPrevDelimiter(a:lnum-1, "<<<'".strpart(line, 0, strlen(line)-1)."'")
-            let startLine = -1
-            if heredoc > nowdoc
-                let startLine = heredoc
-            elseif nowdoc > heredoc
-                let startLine = nowdoc
-            endif
-            if startLine >= 0
-                return '<'.(IndentLevel(startLine)+1)
-            endif
         endif
     endif
 
