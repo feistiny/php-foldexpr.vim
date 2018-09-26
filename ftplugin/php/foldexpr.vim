@@ -42,7 +42,10 @@ if !exists('b:phpfold_doc_with_funcs')
     let b:phpfold_doc_with_funcs = 1
 endif
 if !exists('b:phpfold_use_level')
-    let b:phpfold_use_level = 1
+    let b:phpfold_use_level = get(g:, 'phpfold_use_level', 2)
+endif
+if !exists('g:phpfold_set_default_foldlevel') || g:phpfold_set_default_foldlevel == 1
+    set foldlevel=1
 endif
 
 " If we want to fold functions with their blocks, we have to fold the blocks.
@@ -58,7 +61,7 @@ if !exists('g:phpfold_options_dict')
         \'phpfold_text_right_lines': 1,
         \'phpfold_doc_with_funcs': 1,
         \'phpfold_group_iftry': 1,
-        \'phpfold_use_level': get(g:, 'phpfold_use_level', 2),
+        \'phpfold_use_level': b:phpfold_use_level,
         \}
 endif
 if g:phpfold_open
