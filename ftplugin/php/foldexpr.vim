@@ -113,6 +113,7 @@ function! GetPhpFold(lnum)
             let b:in_heredoc = 1
             return '>'.(IndentLevel(a:lnum)+1)
         elseif line =~? "<<<'[a-zA-Z_][a-zA-Z0-9_]*'$"
+            let b:in_heredoc = 1
             return '>'.(IndentLevel(a:lnum)+1)
         elseif line =~? "^[a-zA-Z_][a-zA-Z0-9_]*;$"
             " heredocs and now docs end the same way, so we have to check for both starts and see which
